@@ -2,9 +2,7 @@
 
 [Unit]
 Description=smtp-to-matrix
-Wants=dnscrypt-proxy.target
 After=network-online.target
-After=dnscrypt-proxy.target
 
 [Service]
 ExecStart=/usr/local/bin/smtp-to-matrix.py
@@ -12,8 +10,6 @@ PIDFile=/run/smtp-to-matrix.pid
 ExecStop=/bin/kill -s QUIT $MAINPID
 User=smtp-to-matrix
 Group=smtp-to-matrix
-# wait for dnscrypt-proxy
-ExecStartPre=/bin/sleep 10
 
 [Install]
 WantedBy=multi-user.target
