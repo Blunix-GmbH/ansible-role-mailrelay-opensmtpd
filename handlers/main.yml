@@ -10,6 +10,43 @@
 
 - name: restart smtp-to-matrix
   systemd:
-    name: smtp-to-matrix
+    name: "smtp-to-matrix-{{ mailrelay_smtp_to_matrix_relay['name'] }}.service"
     state: restarted
     enabled: True
+  listen: restart smtp-to-matrix
+  with_items: >-
+    {{
+      (
+        mailrelay_smtp_to_matrix_systemd_templates.results | default([])
+        + mailrelay_smtp_to_matrix_config_templates.results | default([])
+      )
+      | selectattr('changed', 'equalto', True)
+      | map(attribute='mailrelay_smtp_to_matrix_relay')
+      | unique(attribute='name')
+      | list
+    }}
+  loop_control:
+    loop_var: mailrelay_smtp_to_matrix_relay
+  when: mailrelay_smtp_to_matrix_config_templates is defined or mailrelay_smtp_to_matrix_systemd_templates is defined
+
+# Disable specific smtp-to-matrix service
+- name: disable smtp-to-matrix
+  systemd:
+    name: "smtp-to-matrix-{{ mailrelay_smtp_to_matrix_relay['name'] }}.service"
+    state: stopped
+    enabled: False
+  listen: restart smtp-to-matrix
+  with_items: >-
+    {{
+      (
+        mailrelay_smtp_to_matrix_systemd_templates_disable.results | default([])
+        + mailrelay_smtp_to_matrix_config_templates_disable.results | default([])
+      )
+      | selectattr('changed', 'equalto', True)
+      | map(attribute='mailrelay_smtp_to_matrix_relay')
+      | unique(attribute='name')
+      | list
+    }}
+  loop_control:
+    loop_var: mailrelay_smtp_to_matrix_relay
+  when: mailrelay_smtp_to_matrix_config_templates_disable is defined or mailrelay_smtp_to_matrix_systemd_templates_disable is defined

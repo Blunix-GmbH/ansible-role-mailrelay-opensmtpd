@@ -1,0 +1,24 @@
+# {{ ansible_managed }}
+#
+# When emails are send from / to these addresses, they are relayed via matrix room {{ mailrelay_smtp_to_matrix_relay['name'] }} ({{ mailrelay_smtp_to_matrix_relay['room_id'] }})
+
+{% for mailrelay_smtp_to_matrix_relay_address in mailrelay_smtp_to_matrix_relay['from_or_to'] %}
+{{ mailrelay_smtp_to_matrix_relay_address }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ internal_private_domain }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ internal_public_domain }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ mailrelay_opensmtpd_mailname }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ company_main_domain }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ inventory_hostname }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ inventory_hostname }}.{{ internal_private_domain }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ inventory_hostname }}.{{ internal_public_domain }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ inventory_hostname }}.{{ mailrelay_opensmtpd_mailname }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ inventory_hostname }}.{{ company_main_domain }}
+{% for wg_mesh_alias in wg_mesh_aliases %}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ wg_mesh_alias }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ wg_mesh_alias }}.{{ internal_private_domain }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ wg_mesh_alias }}.{{ internal_public_domain }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ wg_mesh_alias }}.{{ mailrelay_opensmtpd_mailname }}
+{{ mailrelay_smtp_to_matrix_relay_address }}@{{ wg_mesh_alias }}.{{ company_main_domain }}
+{% endfor %}
+
+{% endfor %}

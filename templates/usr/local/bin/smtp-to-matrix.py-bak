@@ -18,16 +18,10 @@ import yaml
 
 import atexit
 
-client = None
-
 @atexit.register
 def goodbye():
     print('Exiting smtp to matrix daemon')
-    if client is not None:
-        try:
-            client.logout()
-        except Exception:
-            pass
+    client.logout()
 
 
 
@@ -74,13 +68,9 @@ if all(item is None for item in [debug, user, password, server, room_id, listen_
 
 
 # Login to matrix
+client = MatrixClient(server) #, encryption=True)
 try:
-    matrix_api = MatrixHttpApi(server)
-    login_response = matrix_api.login("m.login.password", user=user, password=password)
-    access_token = login_response.get('access_token')
-    if access_token is None:
-        log_error("Matrix login error: access_token missing in response")
-    client = MatrixClient(server, user_id=login_response.get('user_id'), token=access_token) #, encryption=True)
+    token = client.login_with_password(user, password)
 except Exception as e:
     log_error("Matrix login error: " + str(e))
 try:
@@ -140,12 +130,9 @@ class CustomHandler:
         log_debug("\n\n==== MESSAGE FOR MATRIX ====\n" + str(matrix_message))
 
         # Send message via matrix
-        try:
-            resp = room.send_text(matrix_message)
-            log_debug(f"matrix send ok, event_id={resp.get('event_id')}")
-            return '250 OK'
-        except Exception as e:
-            log_error(f"Matrix send failed: {e}")
+        if debug == False:
+            room.send_text(matrix_message)
+        return '250 OK'
 
 
 

@@ -2,7 +2,7 @@
   shell: |
       {% for mailrelay_opensmtpd_relay in mailrelay_opensmtpd_relays %}
       {% for mailrelay_opensmtpd_relay_from in mailrelay_opensmtpd_relay['from'] %}
-      echo "Testmail from $(hostname -f)" | mail -a "From: {{ mailrelay_opensmtpd_relay_from }}" -s "Testmail from $(hostname -f)" {{ mailrelay_testmail_recipient }}
+      echo "ansible-role-mailrelay-opensmtpd test from $(hostname -f)" | mail -a "From: {{ mailrelay_opensmtpd_relay_from }}" -s "ansible-role-mailrelay-opensmtpd test from $(hostname -f)" {{ mailrelay_testmail_recipient }}
       {% endfor %}
       {% endfor %}
   args:
@@ -11,7 +11,7 @@
 
 - name: send test mail via monitoring (smtp-to-matrix)
   shell: |
-      echo "Monitoring testmail from $(hostname -f)" | mail -a "From: monitoring@example.com" -s "Monitoring testmail from $(hostname -f)" {{ mailrelay_testmail_recipient }}
+      echo "ansible-role-mailrelay-opensmtpd test from $(hostname -f)" | mail -a "From: monitoring" -s "ansible-role-mailrelay-opensmtpd test from $(hostname -f)" {{ mailrelay_testmail_recipient }}
   args:
     executable: /bin/bash
 
@@ -21,8 +21,10 @@
 
 - name: run smtpctl show queue
   shell: "smtpctl show queue | wc -l"
+  args:
+    executable: /bin/bash
   register: mailrelay_opensmtpd_send_test_mail_queue_output
 
-- name: run smtpctl show queue output
+- name: print run smtpctl show queue output
   debug:
     msg: "{{ mailrelay_opensmtpd_send_test_mail_queue_output.stdout_lines }}"

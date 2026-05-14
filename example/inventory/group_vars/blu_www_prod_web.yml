@@ -1,0 +1,20 @@
+# Outgoing SMTP relays
+mailrelay_opensmtpd_relays:
+  - alias: example_app
+    mail-from: "no-reply@example.com"
+    server: "smtp.example.com"
+    protocol: "smtp+tls"
+    tls: True
+    tls_no_verify: True
+    port: "587"
+    # SETUP #
+    # from password store
+    login: "{{ mailrelay_example_app_user }}"
+    # SETUP #
+    # from password store
+    password: "{{ mailrelay_example_app_password }}"
+    from:
+      - "no-reply@example.com"
+
+# Recipient for test mails that are send via relays, if relays are defined
+mailrelay_testmail_recipient: "ops@example.com"

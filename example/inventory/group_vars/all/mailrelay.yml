@@ -1,0 +1,18 @@
+# Hostname used by OpenSMTPD in mail headers
+# It is best to just write your companies main domain here
+mailrelay_opensmtpd_mailname: "example.com"
+
+# Linux users whose mail should be forwarded to Matrix / monitoring
+mailrelay_smtp_to_matrix_users:
+  - myappuser
+
+
+# SETUP # 
+# SMTP‑to‑Matrix integration
+mailrelay_smtp_to_matrix_username: "example-monitoring"
+# from password store
+mailrelay_smtp_to_matrix_password: "{{ mailrelay_smtp_to_matrix_password }}"
+mailrelay_smtp_to_matrix_server: "https://matrix.org"
+mailrelay_smtp_to_matrix_room_id: "!roomid:matrix.org"
+
+

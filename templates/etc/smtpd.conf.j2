@@ -16,9 +16,9 @@ smtp max-message-size {{ mailrelay_opensmtpd_conf_max_message_size }}
 
 ## TABLES
 table relay_secrets file:/etc/smtpd/tables/relay_secrets
-table monitoring_recipients file:/etc/smtpd/tables/monitoring_recipients
-table monitoring_from file:/etc/smtpd/tables/monitoring_from
-
+{% for mailrelay_smtp_to_matrix_relay in mailrelay_smtp_to_matrix_relays %}
+table matrix_from_and_to_{{ mailrelay_smtp_to_matrix_relay['name'] }} file:/etc/smtpd/tables/matrix_from_and_to_{{ mailrelay_smtp_to_matrix_relay['name'] }}
+{% endfor %}
 
 
 ## LISTEN
@@ -29,10 +29,13 @@ listen on socket mask-src tag "socket"
 
 
 ## ACTION
-# Relay monitoring mails to matrix
-action "relay_monitoring" \
+# SMTP to Matrix relays
+{% for mailrelay_smtp_to_matrix_relay in mailrelay_smtp_to_matrix_relays %}
+action "relay_matrix_{{ mailrelay_smtp_to_matrix_relay['name'] }}" \
     relay \
-    host smtp://127.0.0.1:12325
+    host smtp://127.0.0.1:{{ mailrelay_smtp_to_matrix_relay['port'] }}
+
+{% endfor %}
 
 {% if mailrelay_opensmtpd_relays != [] %}
 # List of authenticated sender addresses and according relay hosts
@@ -40,7 +43,7 @@ action "relay_monitoring" \
 # No mailrelay_opensmtpd_relays defined
 {% endif %}
 {% for mailrelay_opensmtpd_relay in mailrelay_opensmtpd_relays %}
-action "relay_{{ mailrelay_opensmtpd_relay['alias'] }}" \
+action "relay_smtp_{{ mailrelay_opensmtpd_relay['alias'] }}" \
     relay \
 {% if mailrelay_opensmtpd_relay['tls'] | default(True) %}
 {% if mailrelay_opensmtpd_relay['tls_no_verify'] | default(False) %}
@@ -58,16 +61,18 @@ action "relay_{{ mailrelay_opensmtpd_relay['alias'] }}" \
 
 
 ## MATCH
-# Forward monitoring mails to matrix
-match from local mail-from <monitoring_from> for rcpt-to <monitoring_recipients> action "relay_monitoring"
+# Forward mails to matrix
+{% for mailrelay_smtp_to_matrix_relay in mailrelay_smtp_to_matrix_relays %}
+match from local mail-from <matrix_from_and_to_{{ mailrelay_smtp_to_matrix_relay['name'] }}> for rcpt-to <matrix_from_and_to_{{ mailrelay_smtp_to_matrix_relay['name'] }}> action "relay_matrix_{{ mailrelay_smtp_to_matrix_relay['name'] }}"
+{% endfor %}
 
 # Match mail-from and relay
 {% for mailrelay_opensmtpd_relay in mailrelay_opensmtpd_relays %}
 {% for mailrelay_opensmtpd_relay_from in mailrelay_opensmtpd_relay['from'] %}
-match from local mail-from "{{ mailrelay_opensmtpd_relay_from }}" for any action "relay_{{ mailrelay_opensmtpd_relay['alias'] }}"
+match from local mail-from "{{ mailrelay_opensmtpd_relay_from }}" for any action "relay_smtp_{{ mailrelay_opensmtpd_relay['alias'] }}"
 {% endfor %}
 
 {% endfor %}
 
 # Catchall to monitoring for all other mails
-match from any for any action "relay_monitoring"
+match from any for any action "relay_matrix_{{ mailrelay_smtp_to_matrix_relays[0]['name'] }}"

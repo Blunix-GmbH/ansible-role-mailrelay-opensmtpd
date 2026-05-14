@@ -1,39 +1,20 @@
+# Maximum size of email that can be send
+# Keep in mind that the relay servers you use have limits too
 mailrelay_opensmtpd_conf_max_message_size: 100M
+
+# Bounce the mail (will be send to the matrix channel) after 300 seconds
 mailrelay_opensmtpd_smtpd_conf_bounce_warn_interval: 300s
 
+
 # Config files for filters, will be placed in /etc/smtpd/filters/ as well
-opensmtpd_mailrelay_filter_configs:
-  - src: templates/etc/smtpd/filters/regex-replace-data.yml.j2
-    name: regex-replace-data.yml
+opensmtpd_mailrelay_filter_configs: []
+#  - src: templates/etc/smtpd/filters/regex-replace-data.yml.j2
+#    name: regex-replace-data.yml
 
 
-
-# Default matrix server
-mailrelay_smtp_to_matrix_server: "https://matrix.org"
-
-# Recipient users / email addresses which will be forwarded to matrix
-# Define this variable in plays / inventory
-mailrelay_smtp_to_matrix_users: []
-# Default values
-mailrelay_smtp_to_matrix_users_default:
-  - monitoring
-  - root
-  - www-data
-  - prometheus-exporter
-# Combining default with custom values
-mailrelay_smtp_to_matrix_users_template: "{{ mailrelay_smtp_to_matrix_users_default + mailrelay_smtp_to_matrix_users }}"
-
-
-# Defaults from playbook-infrastructure-template-11 - replaced by smtp-to-matrix
-monitoring_email_from: ""
-monitoring_email_sender: ""
-monitoring_email_address: ""
-monitoring_email_recipient: ""
-
+# List of relays - can be empty by default to only use smtp-to-matrix
+mailrelay_opensmtpd_relays: []
 
 # Recipient for test mails after role is applied
-mailrelay_testmail_recipient: "p.thurner@blunix.com"
-
-
-# List of relays
-mailrelay_opensmtpd_relays: []
+# Only used if relays are defined. After the role is applied, a test mail is send via each relay to this recipient.
+mailrelay_testmail_recipient: "{{ lookup('env', 'git_email') }}"

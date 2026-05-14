@@ -1,0 +1,12 @@
+- hosts: setup opensmtpd mailrelay
+  hosts: all
+  roles:
+    - role: blunix_ansible-role-mailrelay-opensmtpd_13.0.0
+  vars:
+
+    # FROM PASSAGE STORE!
+    # Encryption passphrase for the mail queue files
+    # Generate via:
+    # openssl rand -hex 16
+    # This should be in the password-store!
+    mailrelay_opensmtpd_conf_queue_encryption: bab0dddf70fedbc8b2bd59af0abe308f

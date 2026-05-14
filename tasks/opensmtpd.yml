@@ -4,27 +4,10 @@
       - opensmtpd
       - mailutils
       - python3-pip
-
-- name: install python3 pip packages
-  pip:
-    name: bios
-    executable: /usr/bin/pip3
-  with_items:
-    - bios
+      - python3-venv
+    state: present
 
 - name: create config directories
-  file:
-    state: directory
-    name: "{{ mailrelay_opensmtpd_config_directory_item }}"
-    owner: root
-    group: opensmtpd
-    mode: "0750"
-  with_items:
-    - "/etc/smtpd/tables"
-  loop_control:
-    loop_var: mailrelay_opensmtpd_config_directory_item
-
-- name: create config directories for smtp-to-matrix
   file:
     state: directory
     name: "{{ mailrelay_opensmtpd_config_directory_item }}"
@@ -47,18 +30,24 @@
 
 - name: template /etc/smtpd/tables/relay_secrets
   template:
-    src: templates/etc/smtpd/tables/{{ opensmtpd_mailrelay_table_item }}.j2
-    dest: /etc/smtpd/tables/{{ opensmtpd_mailrelay_table_item }}
+    src: templates/etc/smtpd/tables/relay_secrets.j2
+    dest: /etc/smtpd/tables/relay_secrets
     owner: root
     group: opensmtpd
     mode: "0640"
   notify: restart opensmtpd
-  with_items:
-    - relay_secrets
-    - monitoring_from
-    - monitoring_recipients
+
+- name: template /etc/smtpd/tables/
+  template:
+    src: templates/etc/smtpd/tables/matrix_from_and_to.j2
+    dest: /etc/smtpd/tables/matrix_from_and_to_{{ mailrelay_smtp_to_matrix_relay['name'] }}
+    owner: root
+    group: opensmtpd
+    mode: "0640"
+  notify: restart opensmtpd
+  with_items: "{{ mailrelay_smtp_to_matrix_relays }}"
   loop_control:
-    loop_var: opensmtpd_mailrelay_table_item
+    loop_var: mailrelay_smtp_to_matrix_relay
 
 - name: template /etc/mailname
   template:
